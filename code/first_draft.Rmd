@@ -8,10 +8,10 @@ output:
 
 # Group Members
 
-Jiawei Huang (jhuang455)
-Yinqiu Xu (yxu475)
-Yike Wang (wang2557)
-Zijun Feng (zfeng66)
+Jiawei Huang (jhuang455)  
+Yinqiu Xu (yxu475)  
+Yike Wang (wang2557)  
+Zijun Feng (zfeng66)  
 Hao Jiang (hjiang266)
 
 # Data Description and Usage
@@ -36,22 +36,20 @@ To gain an overall insight into the dataset and methodology feasibility, we perf
 
 ## Pre-pocessing
 
-1. **Grayscale** Since we will be mostly deal with the shape of the clothing and color can be directly read from the image, we first convert the colored images with three RGB channels into black and white images with only one single channel. Through function:
+1.  **Grayscale**  
+Since we will be mostly deal with the shape of the clothing and color can be directly read from the image, we first convert the colored images with three RGB channels into black and white images with only one single channel. Through function:
 $$Y_{Linear} = 0.2126*R_{Linear}+0.7152*G_{Linear}+0.0722B_{Linear}$$
-2. **Dimensional reduction** Original number of pixels of an image is beyond the computational power of PC and even hard for high-performance clusters. Thus, we will reduce the dimension of the images. We have tried different dimensions as demonstrated below. Finally, we decided on $32 \times 32$, which contains sufficient information about the shape and is a reasonable number of pixels to fit models.
+2.  **Dimensional reduction**  
+Original number of pixels of an image is beyond the computational power of PC and even hard for high-performance clusters. Thus, we will reduce the dimension of the images. We have tried different dimensions as demonstrated below. Finally, we decided on $32 \times 32$, which contains sufficient information about the shape and is a reasonable number of pixels to fit models.
 
 ## CNN
 
 The pre-processing part indeed takes time but can still achieve by a local PC. So what can we do in CHTC? Our answer is a **Convolutional Neural Network (CNN)**. CNN is perfectly fitted for image data since it needs no flatten, can handle multi-dimensional matrix (like RGB image data), and performs exceptionally well in large datasets. We build a CNN model with the structures of 2 Convolution Layer, 2 Max-Pooling Layer, and 5 FC Layer with LeNet rule. 
 
-1. **Convolution Layer and Max-Pooling Layer** 
+1.  **Convolution Layer and Max-Pooling Layer**   
+In our toy example, We selected kernel K as a $5 \times 5 \times 1$ matrix. With the Kernel Size = 6 and Stride Length = 1 in the first Convolution Layer, we got 6 channels of $28 \times 28$ matrix through valid padding. After that, the Max-Pooling Layer halved the pixels in each channel to decrease computational power. This is achieved and as the kernel moves through the matrix with Stride Value = 1, the computer returns the maximum value from the portion of the image covered by the Pooling Kernel each time. In the second Convolution Layer, with a Kernel Size = 16 and Stride Length = 1, we got 16 channels of $10 \times 10$ matrix through valid padding. The second Max-Pooling Layer is applied after that to finalize our dataset to be $5 \times 5 \times 16$. 
 
-In our toy example, We selected kernel K as a $5 \times 5 \times 1$ matrix. With the Kernel Size = 6 and Stride Length = 1 in the first Convolution Layer, we got 6 channels of $28 \times 28$ matrix through valid padding. After that, the Max-Pooling Layer halved the pixels in each channel to decrease computational power. This is achieved and as the kernel moves through the matrix with Stride Value = 1, the computer returns the maximum value from the portion of the image covered by the Pooling Kernel each time.
-
-In the second Convolution Layer, with a Kernel Size = 16 and Stride Length = 1, we got 16 channels of $10 \times 10$ matrix through valid padding. The second Max-Pooling Layer is applied after that to finalize our dataset to be $5 \times 5 \times 16$. 
-
-2. **Fully Connected Layer** 
-
+2.  **Fully Connected Layer**  
 Now that we have converted the image into multi-channels from our Multi-level Perceptron, we can flatten it into a column vector. Over a series of epochs using **LeNet5**, the model can distinguish the domain features and classify them through **Softmax** method.
 
 # Results
