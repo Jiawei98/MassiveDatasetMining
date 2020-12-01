@@ -20,11 +20,10 @@ if torch.cuda.is_available():
 ## Model Settings
 RANDOM_SEED = 1
 LEARNING_RATE = 0.001
-BATCH_SIZE = 64
-NUM_EPOCHS = 15
-
+BATCH_SIZE = 32
+NUM_EPOCHS = 40
 NUM_FEATURES = 32*32
-NUM_CLASSES = 5
+NUM_CLASSES = 8
 
 if torch.cuda.is_available():
     DEVICE = "cuda:0"
@@ -138,11 +137,12 @@ for epoch in range(NUM_EPOCHS):
 
     model.eval()
     with torch.set_grad_enabled(False): # save memory during inference
-        print('Epoch: %03d/%03d | Train: %.3f%%' % (
-              epoch+1, NUM_EPOCHS, 
-              compute_accuracy(model, train_loader, device=DEVICE)))
-        train_acc=np.append(train_acc, compute_accuracy(model, train_loader, device=DEVICE))
-        test_acc=np.append(test_acc, compute_accuracy(model, test_loader, device=DEVICE))
+        acc1=compute_accuracy(model, train_loader, device=DEVICE)
+        acc2=compute_accuracy(model, test_loader, device=DEVICE)
+        train_acc=np.append(train_acc, acc1)
+        test_acc=np.append(test_acc, acc2)
+        print('Epoch: %03d/%03d | Train: %.3f%% | Test: %.3f%%' % (
+              epoch+1, NUM_EPOCHS, acc1, acc2))
 
     print('Time elapsed: %.2f min' % ((time.time() - start_time)/60))
     
@@ -156,8 +156,8 @@ print('Test accuracy: %.2f%%' % (compute_accuracy(model, test_loader, device=DEV
 plt.figure(figsize=(7, 5))
 plt.plot(train_acc, c='#deb068', label='Training Accuracy')
 plt.plot(test_acc, c='#595857', label='Test Accuracy')
-plt.legend(loc=4, prop={'weight' : 'normal','size': 13})
+plt.legend(loc=4, prop={'weight' : 'normal','size': 12})
 plt.title('Accuracy in each Epoch', fontsize=15)
 plt.xlabel("Epoch", fontsize=13)
 plt.ylabel("Accuracy", fontsize=13)
-plt.savefig('figures/accuracy.jpg')
+plt.savefig('../figures/accuracy.png')
