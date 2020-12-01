@@ -8,7 +8,11 @@ output:
 
 # Group Members
 
-Jiawei Huang, Yinqiu Xu, Yike Wang, Zijun Feng, Hao Jiang
+Jiawei Huang (jhuang455)
+Yinqiu Xu (yxu475)
+Yike Wang (wang2557)
+Zijun Feng (zfeng66)
+Hao Jiang (hjiang266)
 
 # Data Description and Usage
 
@@ -54,7 +58,7 @@ Now that we have converted the image into multi-channels from our Multi-level Pe
 
 ![Accuracy](../figures/accuracy.png){width=50%}
 
-We compress the first 500 images into $32 \times 32$ and took out 407 images in 8 main categories as a **demo** dataset. Then, we split this dataset into training set (60%) and test set (60%). We fitted an LeNet-5 CNN model with Learning Rate = 0.001, Batch Size = 32, and Epochs = 40. The accuracy plot showed that: As the number of epoch increasing, the training accuracy kept increasing and was approaching to 100%, while the test accuracy also kept increasing at first but stabilized at about 75%. The result was resonable because we were working on a very samll demo dataset, and it turned out that our model was correct and could be generalized and applied to a larger dataset. 
+We compressed the first 500 images into $32 \times 32$ and took out 407 images in 8 main categories as a **toy** dataset. Then, we split this dataset into training set (60%) and test set (40%). We fitted an LeNet5 CNN model with Learning Rate = 0.001, Batch Size = 32, and Epochs = 40. The accuracy plot showed that: As the number of epoch increasing, the training accuracy kept increasing and was approaching to 100%, while the test accuracy also kept increasing at first but stabilized at about 75%. The result was resonable because we were working on a very samll toy dataset. It proved that our model was feasible and could be generalized & applied to a larger dataset. 
 
 
 # Future works
