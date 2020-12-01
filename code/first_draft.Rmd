@@ -14,9 +14,11 @@ Yike Wang (wang2557)
 Zijun Feng (zfeng66)  
 Hao Jiang (hjiang266)
 
-# Data Description and Usage
+# Introduction
 
-In the final project, we are focusing on Fashion Product Images Dataset, which contains 42409 high-res product image files. We perform dimension reduction and classification with "articleType" label as output. The dataset is sourced from Kaggle, which could be downloaded from http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset.
+In this project, we are focusing on Fashion Product Images Dataset, which contains 42409 high-res product image files. Our purpose is to build a classifier based on CNN (Convolutional Neural Network), which can predict the category of a product by using its image. We use CHTC to improve the computational efficiency. The dataset is sourced from Kaggle, which could be downloaded from http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset.
+
+# Data Description and Usage
 
 This dataset contains professionally shot high resolution product images, and multiple label attributes describing the product which was manually entered while cataloging. More detailly,
 
@@ -26,7 +28,7 @@ This dataset contains professionally shot high resolution product images, and mu
 
 3.	There's a style.csv file with multiple label attributes of the products: **gender, masterCategory, subCategory, articleType, baseColour, season, year, usage, product name**, which are extracted from the .josn metadata crawled from the internet. 
 
-To perform image classification, we used articleType as category. It contains 144 classes in total, which are detailed product categories people usually refer to such as **Tshirts, Shirts, Shorts and Watches, etc.** We intended to drop categories whose count are less than 500 and finally got 22 classes.
+To perform image classification, we used "articleType" as category. It contains 144 classes in total, which are detailed product categories people usually refer to such as **Tshirts, Shirts, Shorts and Watches, etc.** We intended to drop categories whose count are less than 500 and finally got 22 classes.
 
 To gain an overall insight into the dataset and methodology feasibility, we performed our work flow on a subset of original dataset. 
 
@@ -39,10 +41,10 @@ To gain an overall insight into the dataset and methodology feasibility, we perf
 1.  **Grayscale**  
 Since we will be mostly deal with the shape of the clothing and color can be directly read from the image, we first convert the colored images with three RGB channels into black and white images with only one single channel. Through function:
 $$Y_{Linear} = 0.2126*R_{Linear}+0.7152*G_{Linear}+0.0722B_{Linear}$$
-2.  **Dimensional reduction**  
+2.  **Dimensional Reduction**  
 Original number of pixels of an image is beyond the computational power of PC and even hard for high-performance clusters. Thus, we will reduce the dimension of the images. We have tried different dimensions as demonstrated below. Finally, we decided on $32 \times 32$, which contains sufficient information about the shape and is a reasonable number of pixels to fit models.
 
-## CNN
+## CNN Model
 
 The pre-processing part indeed takes time but can still achieve by a local PC. So what can we do in CHTC? Our answer is a **Convolutional Neural Network (CNN)**. CNN is perfectly fitted for image data since it needs no flatten, can handle multi-dimensional matrix (like RGB image data), and performs exceptionally well in large datasets. We build a CNN model with the structures of 2 Convolution Layer, 2 Max-Pooling Layer, and 5 FC Layer with LeNet rule. 
 
@@ -59,21 +61,21 @@ Now that we have converted the image into multi-channels from our Multi-level Pe
 We compressed the first 500 images into $32 \times 32$ and took out 407 images in 8 main categories as a **toy** dataset. Then, we split this dataset into training set (60%) and test set (40%). We fitted an LeNet5 CNN model with Learning Rate = 0.001, Batch Size = 32, and Epochs = 40. The accuracy plot showed that: As the number of epoch increasing, the training accuracy kept increasing and was approaching to 100%, while the test accuracy also kept increasing at first but stabilized at about 75%. The result was resonable because we were working on a very samll toy dataset. It proved that our model was feasible and could be generalized & applied to a larger dataset. 
 
 
-# Future works
+# Conclusion and Future Work
 
 We have proved the feasibility of our method. In the future, CHTC can help with our Convolutional Neural Network in 2 ways to establish a more appliable distinguish model.
 
-1. **More data** 
+1. **More data**  
+Instead of using only around 500 images for now, with the help of CHTC, we can do dimensional reduction for all images efficiently and achieve a better CNN classifier on full dataset.
 
-Instead of using only around 500 images for now, with the help of CHTC, we can achieve a CNN model with a considerable size dataset to improve its overall performance.
-
-2. **Hyperparameter turning** 
-
-Several hyperparameters can be changed to find the best combination. We can test the hyperparameters to fit the model of best accuracy.
-
+2. **Hyperparameter turning**  
+Several hyperparameters can be modified in order to get the best performance. We can use CHTC to get the performance of each combination in parallel. The hyperparameters are:
 - Total layer of network
 - Kernel Size for each Layer
 - Max-Pooling or Ave-Pooling
 - Architectures of FC Layer (LeNet, AletNet, VGGNet, etc.)
+
+
+
 
 
