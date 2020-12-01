@@ -16,9 +16,11 @@ Hao Jiang (hjiang266)
 
 # Introduction
 
-In this project, we are focusing on Fashion Product Images Dataset, which contains 42409 high-res product image files. Our purpose is to build a classifier based on CNN (Convolutional Neural Network), which can predict the category of a product by using its image. We use CHTC to improve the computational efficiency. The dataset is sourced from Kaggle, which could be downloaded from http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset.
+In this project, we are focusing on Fashion Product Images Dataset, which contains 42409 high-res product image files. Our purpose is to build a classifier based on CNN (Convolutional Neural Network), which can predict the category of a product by using its image. We use CHTC to improve the computational efficiency. 
 
 # Data Description and Usage
+
+The dataset is sourced from Kaggle, which could be downloaded from http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset. 
 
 This dataset contains professionally shot high resolution product images, and multiple label attributes describing the product which was manually entered while cataloging. More detailly,
 
