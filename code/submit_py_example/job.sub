@@ -1,0 +1,23 @@
+universe = vanilla
+log = log/log_$(Clauster)_$(Process).log
+error = err/err_$(Clauster)_$(Process).err
+output = out/out.out
+
+executable = run_python.sh
+arguments = all_packages_loaded, commandline_argument2, commandline_argument3
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = \
+    /staging/groups/STAT605_team1/build/python38.tar.gz, \
+    /staging/groups/STAT605_team1/build/packages.tar.gz, \
+    run_python.sh, \
+    my_script.py 
+
+request_cpus = 2
+request_memory = 4GB
+request_disk = 10GB
+
+queue 1
+
+

@@ -1,0 +1,43 @@
+000 (217623.000.000) 2020-12-04 12:04:08 Job submitted from host: <128.104.100.148:9618?addrs=128.104.100.148-9618+[2607-f388-107c-501-216-3eff-feb2-bc11]-9618&alias=learn.chtc.wisc.edu&noUDP&sock=schedd_2128_35a0>
+...
+040 (217623.000.000) 2020-12-04 12:04:10 Started transferring input files
+	Transferring to host: <128.105.244.120:9618?addrs=128.105.244.120-9618&alias=build3000.chtc.wisc.edu&noUDP&sock=slot1_1_845_20fb_63915>
+...
+040 (217623.000.000) 2020-12-04 12:04:12 Finished transferring input files
+...
+001 (217623.000.000) 2020-12-04 12:04:13 Job executing on host: <128.105.244.120:9618?addrs=128.105.244.120-9618&alias=build3000.chtc.wisc.edu&noUDP&sock=startd_6339_9aef>
+...
+006 (217623.000.000) 2020-12-04 12:04:16 Image size of job updated: 5500
+	566  -  MemoryUsage of job (MB)
+	578872  -  ResidentSetSize of job (KB)
+...
+006 (217623.000.000) 2020-12-04 12:04:21 Image size of job updated: 6904
+	566  -  MemoryUsage of job (MB)
+	578872  -  ResidentSetSize of job (KB)
+...
+006 (217623.000.000) 2020-12-04 12:09:23 Image size of job updated: 2850728
+	2784  -  MemoryUsage of job (MB)
+	2850728  -  ResidentSetSize of job (KB)
+...
+040 (217623.000.000) 2020-12-04 12:09:44 Started transferring output files
+...
+040 (217623.000.000) 2020-12-04 12:09:56 Finished transferring output files
+...
+005 (217623.000.000) 2020-12-04 12:09:57 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:02:40, Sys 0 00:00:20  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:02:40, Sys 0 00:00:20  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	839793152  -  Run Bytes Sent By Job
+	53  -  Run Bytes Received By Job
+	839793152  -  Total Bytes Sent By Job
+	53  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage  Request Allocated 
+	   Cpus                 :       1.02        1         1 
+	   Disk (KB)            : 3638940    10485760  11796781 
+	   IoHeavy              :                             0 
+	   Memory (MB)          :    2784        4096      4096 
+
+	Job terminated of its own accord at 2020-12-04T18:04:16Z.
+...
