@@ -1,0 +1,18 @@
+universe = vanilla
+executable = ./convertImages.sh
+
+arguments = $(tgzFile)
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = ./convertImages.R, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz, /mnt/cephfs/staging/groups/STAT605_team1/packages.tar.gz, /mnt/cephfs/staging/groups/STAT605_team1/images_tgz/$(tgzFile)
+
+log    =    log/convert_$(Cluster)_$(tgzFile).log
+error  =  error/convert_$(Cluster)_$(tgzFile).err
+output = output/convert_$(Cluster)_$(tgzFile).out
+
+request_cpus = 1
+request_memory = 2GB
+request_disk = 2GB
+
+queue tgzFile from images_tgz_list.txt
