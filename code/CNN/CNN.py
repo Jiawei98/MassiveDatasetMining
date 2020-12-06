@@ -18,8 +18,6 @@ from PIL import Image
 if torch.cuda.is_available():
     torch.backends.cudnn.deterministic = True
 
-print(1)
-
 # Get Argument
 hyper_parameters = pd.read_csv("randomSearchCNN.csv").iloc[int(sys.argv[1])].values.tolist()
 lrate = hyper_parameters[6]
@@ -38,8 +36,6 @@ else:
     DEVICE = "cpu"
     
 GRAYSCALE = True
-
-print(2)
 
 ## Load Dataset
 resize_transform = transforms.Compose([transforms.Grayscale(),transforms.Resize((32, 32)),transforms.ToTensor()])
@@ -161,6 +157,9 @@ print('Total Training Time: %.2f min' % ((time.time() - start_time)/60))
 
 print('Test accuracy: %.2f%%' % (compute_accuracy(model, test_loader, device=DEVICE)))
 
-save = np.array([train_acc[len(train_acc)-1],test_acc[len(test_acc)-1]])
+all_acc = [train_acc[len(train_acc)-1],test_acc[len(test_acc)-1]]
+res = hyper_parameters + all_acc
 
-np.savetxt("res_"+sys.argv[1]+".csv",save, delimiter=",")
+with open("res_"+sys.argv[1]+".txt", 'w') as f:
+    for item in res:
+        f.write("%s\t" % item)
