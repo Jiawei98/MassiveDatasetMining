@@ -18,4 +18,7 @@ request_cpus = 1
 request_memory = 3GB
 request_disk = 3GB
 
+on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 10) && ((CurrentTime - EnteredCurrentStatus) > 120)
+
 queue 1000
