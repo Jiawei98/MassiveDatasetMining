@@ -193,7 +193,7 @@ With the results from first attempt, we reset the parameters to new values in th
 
 
 ```{r}
-res <- fit1$residuals[fit1$residuals]
+res <- fit1$residuals
 qplot(sample=fit1$residuals,data=acc)+labs(title="QQplot of validation accuracy", y="sample",x="theoritical")+
   geom_qq_line()
 ```
@@ -291,7 +291,7 @@ ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) +
         theme_minimal() + 
       labs(title="Scatterplot for running time on Learning Rate",
            x="Learning Rate",
-           y="Average Validation Accuracy") +
+           y="Average Time") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
@@ -309,7 +309,7 @@ ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) +
         theme_minimal() + 
             labs(title="Scatterplot for trunning time on Batch Size",
            x="Batch Size",
-           y="Average Validation Accuracy") +
+           y="Average Time") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
@@ -327,7 +327,7 @@ ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) +
         theme_minimal() + 
             labs(title="Scatterplot for running time on filter number 1",
            x="filter number 1",
-           y="Average Validation Accuracy") +
+           y="Average Time") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
@@ -343,9 +343,9 @@ ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) +
   geom_line(aes(group = group),color=blues9[3],size=2) +
   geom_point(size=4,color=blues9[9])  +
         theme_minimal() + 
-            labs(title="Scatterplot for running time on filter number 1",
-           x="filter number 1",
-           y="Average Validation Accuracy") +
+            labs(title="Scatterplot for running time on filter number 2",
+           x="filter number 2",
+           y="Average Time") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
