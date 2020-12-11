@@ -72,7 +72,7 @@ We submitted 600 parallel jobs on CHTC to fit 600 CNN models with different comb
 
 ```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
 library(ggplot2)
-acc = read.csv("res_table.csv")
+acc = read.csv("../dataset/res_table.csv")
 #colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
 lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
 lrate = data.frame(learning_rate = factor(names(lrate)),
@@ -190,4 +190,100 @@ With the results from first attempt, we reset the parameters to new values in th
 | Hidden Layer 2 | $H_2$ | 40 |
 | Learning Rate | $R$ | [0.002,0.001,0.0005,0.0001] |
 | Batch Size | $S$ | [64,128,256,512] |
+
+
+```{r}
+res <- fit1$residuals[fit1$residuals]
+qplot(sample=fit1$residuals,data=acc)+labs(title="QQplot of validation accuracy", y="sample",x="theoritical")+
+  geom_qq_line()
+```
+
+
+```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
+library(ggplot2)
+acc = read.table("../dataset/all_res.csv",sep=",",header = TRUE)
+#colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
+options(scipen = 200)
+lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
+lrate = data.frame(learning_rate = names(lrate),
+                   validation_accuracy = lrate,group="")
+ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9]) + 
+        theme_minimal() + 
+      labs(title="Scatterplot for average accuracy on Learning Rate",
+           x="Learning Rate",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+lrate = tapply(acc$`validation_accuracy`, acc$batch_size ,mean)
+lrate = data.frame(batch_size = c("64","128","256","512"),
+                   validation_accuracy = lrate,group=1)
+ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9])  +
+        theme_minimal() + 
+            labs(title="Scatterplot for average accuracy on Batch Size",
+           x="Batch Size",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+lrate = tapply(acc$validation_accuracy, acc$filter_number_1 ,mean)
+lrate = data.frame(filter_num1 = c("3","4","5","6"),
+                   validation_accuracy = lrate,group="")
+ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9])  +
+        theme_minimal() + 
+            labs(title="Scatterplot for average accuracy on filter number 1",
+           x="filter number 1",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+lrate = tapply(acc$validation_accuracy, acc$filter_number_2 ,mean)
+lrate = data.frame(filter_num1 = c("8","12","16","20","24","28"),
+                   validation_accuracy = lrate,group="")
+ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9])  +
+        theme_minimal() + 
+            labs(title="Scatterplot for average accuracy on filter number 1",
+           x="filter number 1",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+```
+
+
+
+
+
+
+
+
+
 
