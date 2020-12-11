@@ -20,7 +20,7 @@ In this project, we are focusing on Fashion Product Images Dataset, which contai
 
 To gain an overall insight into the dataset and methodology feasibility, we performed our workflow here. Detailly, we first pre-pressed the image on CHTC to get and dimensional reduced, grayscale image for model training. After that, we split the set into training set (60%), validation set (30%), and test set(10%). We use parallel computation on CHTC to fit multiple CNN models under LeNet5 architecture with different hyperparameters on the training set to gain an insight into what the hyperparameters should be used, and prepare for the larger scale hyperparameter tuning in the future. 
 
-![Workflow](workflow.png)
+#[Workflow](workflow.png)
 
 # Data Description and Summary
 
@@ -71,8 +71,9 @@ Now that we have converted the image into multi-channels from our Multi-level Pe
 We submitted 600 parallel jobs on CHTC to fit 600 CNN models with different combination of hyperparameters. The whole process took about 3 hours. After all jobs have been completed, we compared their validation accuracy. Here we provide two examples to illustrate how hyperparameters can affect model performance:
 
 ```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
+
 library(ggplot2)
-acc = read.csv("../dataset/res_table.csv")
+acc = read.csv("res_table.csv")
 #colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
 lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
 lrate = data.frame(learning_rate = factor(names(lrate)),
@@ -192,16 +193,18 @@ With the results from first attempt, we reset the parameters to new values in th
 | Batch Size | $S$ | [64,128,256,512] |
 
 
-```{r}
+```{r, fig.show="hold", out.width="45%", fig.align = "center"}
 res <- fit1$residuals
 qplot(sample=fit1$residuals,data=acc)+labs(title="QQplot of validation accuracy", y="sample",x="theoritical")+
   geom_qq_line()
+#plot(fit1$fitted.values, rstandard(fit1),ylim=c(-4,4),ylab = "standardized residual",xlab = "predicted accuracy",main = "standardized residual plot")
 ```
+We tried to diagnose normal model assumption by a qq plot. Here we would say the normal assumption is plausible, while there seems to be more data located at the extremes of the distribution. 
 
+```{r, echo=TRUE, figures-side1, fig.show="hold", out.width="45%", fig.align = "center"}
 
-```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
 library(ggplot2)
-acc = read.table("../dataset/all_res.csv",sep=",",header = TRUE)
+acc = read.table("CNN/all_res.csv",sep=",",header = TRUE)
 #colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
 options(scipen = 200)
 lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
@@ -275,12 +278,17 @@ ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) +
             axis.text = element_text(size=12),
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
-
+acc[acc$validation_accuracy==max(acc$validation_accuracy),]
+test<-acc[acc$validation_accuracy>86,-5]
+head(test[order(test$time),])
+acc[acc$filter_number_1==5 & acc$filter_number_2==28 & acc$learning_rate==0.002 & acc$batch_size==64,]
 ```
-```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
-library(ggplot2)
-acc = read.table("../dataset/all_res.csv",sep=",",header = TRUE)
-#colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
+
+
+The highest validation accuracy in all 384 models is 86.98%, with time 706.71s. The corresponding hyperparameters combination is filter_num1=6, filter_num2=28, learning_rate=0.001 and batch_size=64, with kernel_size1=3, kernel_size2=3, hidden_layer1=120, hidden_layer2=40. However, if we focus on models with validation accuracy larger than 86 and order them by running time, we could find models with great improvement in running time. So if we'd like to consider trade-off of time, we could choose the model with four hyperparameters combination to be filter_num1=5, filter_num2=24, learning_rate=0.002 and batch_size=128, with validation accuracy to be 86.40% and time to be 510.80s. The reduce in time is about 27.72%, while the accuracy only drops 0.58%. We’ll use these hyperparameters to fit a new model with data in both training and validation sets, and then use the “secret” test dataset to evaluate the perfermance of this model.
+
+
+```{r, echo=TRUE, figures-side2, fig.show="hold", out.width="45%", fig.align = "center"}
 options(scipen = 200)
 lrate = tapply(acc$time, acc$learning_rate,mean)
 lrate = data.frame(learning_rate = names(lrate),
@@ -307,7 +315,7 @@ ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) +
   geom_line(aes(group = group),color=blues9[3],size=2) +
   geom_point(size=4,color=blues9[9])  +
         theme_minimal() + 
-            labs(title="Scatterplot for trunning time on Batch Size",
+            labs(title="Scatterplot for running time on Batch Size",
            x="Batch Size",
            y="Average Time") +
       theme(
@@ -353,10 +361,14 @@ ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) +
             axis.text = element_text(size=12),
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
-
+acc[acc$validation_accuracy==max(acc$validation_accuracy),]
+test<-acc[acc$validation_accuracy>86,-5]
+head(test[order(test$time),])
+acc[acc$filter_number_1==3 & acc$filter_number_2==8 & acc$learning_rate==0.001 & acc$batch_size==256,]
+acc[acc$time==min(acc$time),]
 ```
 
-
+Based on these plots, we could always find the best hyperparameters for validation accuracy and running time. Filter number 1=5, filter number 2=28, learning rate=0.002 and batch size=64 give the highest average validation accuracy separately; Filter number 1=3, filter number 2=8, learning rate=0.001 and batch size=256 give the lowest average running time separately. However, compared with our final models, the combination of best hyperparameters not always gives the best results. Also, if we choose combination of best hyperparameters for validation accuracy: filter number 1=5, filter number 2=28, learning rate=0.002 and batch size=64, the accuracy is 86.02%. Therefore, the relationship among hyperparameters and validation accuracy/time is not convex.
 
 
 
