@@ -8,19 +8,20 @@ In this project, we are focusing on Fashion Product Images Dataset, which contai
 
 In general, we first preprocessed the image on CHTC to get dimensional reduced, grayscale image for model training. Then, we split these images into training set (60%), validation set (30%), and test set(10%). After that, we used parallel computation on CHTC to fit multiple CNN models under LeNet5 architecture with different hyperparameters on the training set in order to find the best hyperparameter combination. The accuracy of our final model on test set is 88%.
 
-# Files
+## Files
 
 - `\code\CNN` contains the code for CNN model on CHTC.
 - `\code\build_by_packages` contains the code to build R and Python environment, and essential packages.
-- `\code\convertImages\` contains the code for image preprocessing.
+- `code\dataset` contains cleaned dataset (32x32 grayscale images).
+- `\code\convertImages` contains the code for image preprocessing on CHTC.
 - `\drafts` contains the proposal, first and second version of reports.
 - `\figures` contains the figures rendered in our project.
 - `\final_draft` is our final report.
 
 ## Group members
 
-Jiawei Huang (jhuang455)  
-Yinqiu Xu (yxu475)  
-Yike Wang (wang2557)  
-Zijun Feng (zfeng66)  
-Hao Jiang (hjiang266)
+Jiawei Huang (jhuang455@wisc.edu)  
+Yinqiu Xu (yxu475@wisc.edu)  
+Yike Wang (wang2557@wisc.edu)  
+Zijun Feng (zfeng66@wisc.edu)  
+Hao Jiang (hjiang266@wisc.edu)
