@@ -18,33 +18,73 @@ Hao Jiang (hjiang266)
 
 In this project, we are focusing on Fashion Product Images Dataset, which contains 44440 high-res product image files. Our purpose is to build a classifier based on CNN (Convolutional Neural Network), which can predict the category of a product by using its image. We use CHTC to improve the computational efficiency.
 
-To gain an overall insight into the dataset and methodology feasibility, we performed our workflow here. Detailly, we first pre-pressed the image on CHTC to get and dimensional reduced, grayscale image for model training. After that, we split the set into training set (60%), validation set (30%), and test set(10%). We use parallel computation on CHTC to fit multiple CNN models under LeNet5 architecture with different hyperparameters on the training set to gain an insight into what the hyperparameters should be used, and prepare for the larger scale hyperparameter tuning in the future. 
+To get an overall insight into the dataset and methodology feasibility, we performed our workflow here (Figure 1).
 
-#[Workflow](workflow.png)
+![Workflow](../figures/workflow.png)
 
-# Data Description and Summary
+Detailly, we first pre-pressed the image on CHTC to get dimensional reduced, grayscale image for model training. After that, we split the set into training set (60%), validation set (30%), and test set(10%). We use parallel computation on CHTC to fit multiple CNN models under LeNet5 architecture with different hyperparameters on the training set to get an insight into what the hyperparameters should be used, and prepare for the larger scale hyperparameter tuning in the future.
 
-The dataset is sourced from Kaggle, which could be downloaded from http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset. 
+# Data Description
+
+The dataset is sourced from Kaggle, which could be downloaded from [here](http://www.kaggle.com/paramaggarwal/fashion-product-images-dataset). 
 
 This dataset contains professionally shot high resolution product images, and multiple label attributes describing the product which was manually entered while cataloging. More detailly, there're 44440 .jpg image files with fashion product, which could all be read into R as a $2400 \times 1800 \times 3$ dimensional array, where 2400 and 1800 represent the pixals in width and height respectively, 3 represent the RGB kernel for the image. For each image file, the product is centrally distributed. For image files in the same class, products share similar features. This ensures the feasibility of machine learning algorithms. Additionally, there's a style.csv file with multiple label attributes of the products: **gender, masterCategory, subCategory, articleType, baseColour, season, year, usage, product name**, which are extracted from the .josn metadata crawled from the internet. 
 
-To perform image classification, we used articleType as category. It contains 144 classes in total, which are detailed product categories people usually refer to such as **Tshirts, Shirts, Shorts and Watches, etc.** We intended to drop categories whose count are less than 600 and finally got 32618 images in 22 classes.
+To perform image classification, we used articleType as category. It contains 144 classes in total, which are detailed product categories people usually refer to such as **Tshirts, Shirts, Shorts and Watches, etc.** We intended to drop categories whose count are less than 500 and finally got 32618 images in 22 classes.
 
-## Pre-pocessing
 
-**Detail description of preprocessing**
+## Preparation
+
+### Environment Preparation 
+
+Both R and Python are used for different purposes in this project. R is installed with package OpenImageR to pre-process the images and Python is installed with several essential packages (numpy, torch, pandas, torchvision, PIL) to build a neural network. Therefore, two interactive jobs were created to first download necessary files, then to install packages and finally return built files for R and Python respectively. We have learned about how to build R environment in class. To build up the Python environment, we followed the [CHTC Python instruction](https://chtc.cs.wisc.edu/python-jobs.shtml). More details can be found in the illustration below (Figure 2):
+
+![Building Python Environment](../figures/CHTC_Env.png){width=50%}
+
+### Image Pre-pocessing
+
+In this step, we use R and OpenImageR package to convert original images into $32 \times 32$ grayscale images.
 
 1. **Grayscale**  
-Since we will be mostly deal with the shape of the clothing and color can be directly read from the image, we first convert the colored images with 3 RGB channels into black and white images with only one single channel. Through function:
+Since we will be mostly deal with the shape of the clothing, we first convert the colored images with 3 RGB channels into black and white images with only one single channel. Through function:
 $$Y_{Linear} = 0.2126*R_{Linear}+0.7152*G_{Linear}+0.0722B_{Linear}$$
-2. **Dimensional reduction**  
-Original number of pixels of an image is beyond the computational power of PC and even hard for high-performance clusters. Thus, we will reduce the dimension of the images.We decided on $32 \times 32$, which contains sufficient information about the shape and is a reasonable number of pixels to fit models.
 
-## CNN
+2. **Dimensional reduction**  
+Original number of pixels of an image is beyond the computational power of PC and even hard for high-performance clusters. Thus, we reduced the dimension of the images. We decided on $32 \times 32$, because it contains sufficient information about the shape and is a reasonable number of pixels to fit models.
+
+To complete image pre-processing efficiently, we divided and compressed all 44440 images into 59 .tgz files, then used CHTC to process these 59 .tgz files in parallel. More details can be found in the illustration below (Figure 3):
+
+![Images Pre-processing](../figures/CHTC_Cvt_Img.png){width=50%}
+
+## CNN Model
 
 CNN is perfectly fitted for image data since it needs no flatten, can handle multi-dimensional matrix (like RGB image data), and performs exceptionally well in large datasets. A CNN model often contains dozens of hyperparameters, and there are millions of hyperparameter combinations. Even on CHTC, it is impossible to traverse all the hyperparameters and find the best model. Therefore, we decided to set several levels for each hyperparameter, and use random search to find high-performance combination.
 
-More detailly, in the first draft, we build a CNN model with the structures of 2 Convolution Layer, 2 Max-Pooling Layer, and 5 FC Layer with LeNet rule, run 600 parallel jobs on CHTC with the random selected hyperparameters from the table above, compare their accuracy on validation set, and finally get a summarization of the performance for different hyperparameters.
+More detailly, we built a CNN model with the structures of 2 Convolution Layer, 2 Max-Pooling Layer, and 5 FC Layer with LeNet rule, then ran parallel jobs on CHTC with the random selected hyperparameters from the table and compare their accuracy on validation set. Finally, we got a summarization of the performance for different hyperparameters.
+
+The structure of our neural network is described below:
+
+1. **Convolution Layer and Max-Pooling Layer**  
+We selected kernel 1 as a $K_1 \times K_1 \times 1$ matrix. With the Kernel Size = $N_1$ and Stride Length = 1 in the first Convolution Layer, we got $N_1$ channels of $32 \times 32$ matrix through valid padding. After that, the Max-Pooling Layer halved the pixels in each channel to decrease computational power. This is achieved and as the kernel moves through the matrix with Stride Value = 1, the computer returns the maximum value from the portion of the image covered by the Pooling Kernel each time.  
+In the second Convolution Layer, with a Kernel Size = $N_2$ and Stride Length = 1, we got $N_2$ channels of $16 \times 16$ matrix through valid padding. The second Max-Pooling Layer is applied after that to finalize our dataset to be $8 \times 8 \times N_2$. 
+
+2. **Fully Connected Layer**  
+Now that we have converted the image into multi-channels from our Multi-level Perceptron, we can flatten it into a column vector and go through two hidden layers with dimension $H_1$ and $H_2$. Over a series of epochs using **LeNet5**, the model can distinguish the domain features and classify them through **Softmax** method.
+
+
+# Hyperparameter tuning
+
+In this part, we did hyperparameter tuning by random search. In our first draft, we only compared 600 hyperparameter combinations. In our final draft, we adjusted the range of hyperparameters based on previous result and compared 3000 hyperparameter combinations.
+
+The following figure illustrate how we get all accuracy for 3000 hyperparameter combinations in parallel by using CHTC (Figure 4).
+
+![Hyperparameter tuning](../figures/CHTC_CNN.png){width=50%}
+
+More details will be introduced in the following.
+
+## First Try
+
+After building up the CNN model in Python, we used CHTC to do hyperparameter tuning efficiently. The following table shows the range of each hyperparameter in our first draft:
 
 | Hyperparameter | Annocatation | Value |
 |---|:---:|:---:|
@@ -52,71 +92,31 @@ More detailly, in the first draft, we build a CNN model with the structures of 2
 | Kernel  Size 1 | $K_1$ | [3,5] |
 | Filter Numeber 2 | $N_1$ | [24,32,48] |
 | Kernel  Size 2 | $K_2$ | [3,5] |
-| Hidden Layer 1 | $H_1$ | [120,100,80] |
-| Hidden Layer 2 | $H_2$ | [60,50,40] |
+| Hidden Layer 1 | $H_1$ | [80,100,120] |
+| Hidden Layer 2 | $H_2$ | [40,50,60] |
 | Learning Rate | $R$ | [0.001,0.003,0.01,0.03] |
-| Batch Size | $S$ | [32,64,128,160] |
+| Batch Size | $S$ | [32,64,128,256] |
 
-The structure of our neural network is described below:
 
-1. **Convolution Layer and Max-Pooling Layer**  
-We selected kernel K as a $K_1 \times K_1 \times 1$ matrix. With the Kernel Size = $N_1$ and Stride Length = 1 in the first Convolution Layer, we got $N_1$ channels of $32 \times 32$ matrix through valid padding. After that, the Max-Pooling Layer halved the pixels in each channel to decrease computational power. This is achieved and as the kernel moves through the matrix with Stride Value = 1, the computer returns the maximum value from the portion of the image covered by the Pooling Kernel each time.  
-In the second Convolution Layer, with a Kernel Size = $K_2$ and Stride Length = 1, we got $K_2$ channels of $16 \times 16$ matrix through valid padding. The second Max-Pooling Layer is applied after that to finalize our dataset to be $8 \times 8 \times K_2$. 
+We submitted 600 parallel jobs on CHTC to fit 600 CNN models (epoch_num=15) with random combination of hyperparameters from the table. The whole process took about 2 hours. After all jobs have been completed, we compared their validation accuracy. The highest validation accuracy is 87.66%. The corresponding hyperparameters combination is filter_num1=12, kernel_size1=3, filter_num2=32, kernel_size2=3, hidden_layer1=120, hidden_layer2=40, learning_rate=0.001 and batch_size=64.
 
-2. **Fully Connected Layer**  
-Now that we have converted the image into multi-channels from our Multi-level Perceptron, we can flatten it into a column vector and go through two hidden layers with dimension $H_1$ and $H_2$. Over a series of epochs using **LeNet5**, the model can distinguish the domain features and classify them through **Softmax** method.
+Some hyperparameter combinations lead to very low accuracy (less than 30%). For example, with learning_rate=0.03, many accuracy were around 20%, which turned out 0.03 is a bad choice for learning_rate.
 
-# Results
+Here we provide several examples to illustrate how hyperparameters can affect model performance. We only consider data with accuracy greater than 30%.
 
-We submitted 600 parallel jobs on CHTC to fit 600 CNN models with different combination of hyperparameters. The whole process took about 3 hours. After all jobs have been completed, we compared their validation accuracy. Here we provide two examples to illustrate how hyperparameters can affect model performance:
-
-```{r, echo=TRUE, figures-side, fig.show="hold", out.width="45%", fig.align = "center"}
-
+```{r, echo=FALSE, fig.show="hold", out.width="42%", fig.align = "center"}
 library(ggplot2)
-acc = read.csv("res_table.csv")
-#colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
-lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
-lrate = data.frame(learning_rate = factor(names(lrate)),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9]) + 
-        theme_minimal() + 
-      labs(title="Scatterplot for average accuracy on Learning Rate",
-           x="Learning Rate",
-           y="Average Validation Accuracy") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
+options(scipen = 200)
 
-lrate = tapply(acc$`validation_accuracy`, acc$batch_size ,mean)
-lrate = data.frame(batch_size = factor(names(lrate),levels = c("32","64","128","256")),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9]) + ylim(40,70) +
-        theme_minimal() + 
-            labs(title="Scatterplot for average accuracy on Batch Size",
-           x="Batch Size",
-           y="Average Validation Accuracy") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
+acc = read.csv("CNN/all_res_600.csv", header=T)
+acc = acc[acc$validation_accuracy>30,]
 
-lrate = tapply(acc$validation_accuracy, acc$filter_num1 ,mean)
-lrate = data.frame(filter_num1 = factor(names(lrate),levels = c("4","8","12")),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
+filter_num1 = tapply(acc$validation_accuracy, acc$filter_num1 ,mean)
+filter_num1 = data.frame(filter_num1 = factor(names(filter_num1),levels = c(4,8,12)),
+                   validation_accuracy = filter_num1, group="")
+ggplot(filter_num1,aes(x=filter_num1,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9]) + ylim(40,70) +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
         theme_minimal() + 
             labs(title="Scatterplot for average accuracy on filter number 1",
            x="filter number 1",
@@ -129,12 +129,12 @@ ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) +
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$validation_accuracy, acc$filter_num2 ,mean)
-lrate = data.frame(filter_num2 = factor(names(lrate),levels = c("24","32","48")),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num2,y=validation_accuracy)) + 
+filter_num2 = tapply(acc$validation_accuracy, acc$filter_num2 ,mean)
+filter_num2 = data.frame(filter_num2 = factor(names(filter_num2),levels = c(24,32,48)),
+                   validation_accuracy = filter_num2, group="")
+ggplot(filter_num2,aes(x=filter_num2,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9]) + ylim(40,70) +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
         theme_minimal() + 
             labs(title="Scatterplot for average accuracy on filter number 2",
            x="filter number 2",
@@ -146,70 +146,10 @@ ggplot(lrate,aes(x=filter_num2,y=validation_accuracy)) +
             axis.text = element_text(size=12),
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
-```
 
-
-The highest validation accuracy in all 600 models is 87.66%. The corresponding hyperparameters combination is filter_num1=12, kernel_size1=3, filter_num2=32, kernel_size2=3, hidden_layer1=120, hidden_layer2=40, learning_rate=0.001 and batch_size=64. We'll use these hyperparameters to fit a new model with data in both training and validation sets, and then use the "secret" test dataset to evaluate the perfermance of this model.
-
-```{r, echo=FALSE, out.width = '55%', fig.align = "center"}
-acc1<-c(0.74641, 0.82119, 0.85430, 0.86350, 0.88970, 0.89644, 0.91746, 0.92087, 0.93681, 0.94205, 0.94812, 0.95255, 0.96174, 0.96989, 0.97377)
-acc2<-c(0.74625, 0.81489, 0.82869, 0.82654, 0.85290, 0.85719, 0.86638, 0.86393, 0.86914, 0.87067, 0.86148, 0.86791, 0.87220, 0.87251, 0.87006)
-plot(1:15, acc1, type="l", col="blue", ylim=c(0.7, 1), cex.lab=1.2, cex.main=1.2, lty=2, 
-     main="Accuracy in each Epoch",
-     xlab="Epoch", ylab="Accuracy", lwd=2)
-lines(1:15, acc2, type="l", col="red", lwd=2, lty=1)
-legend("bottomright", legend=c("Training accuracy", "Test accuracy"),
-       col=c("blue", "red"), lty=c(2, 1), cex=1.2)
-```
-
-
-The accuracy plot showed that: As the number of epoch increasing, the training accuracy kept increasing and was approaching to 100%, while the test accuracy also kept increasing at first but stabilized at about 87%. It proved that our final model has a good performance on product images classification.
-
-
-# Final draft work (newly appended)
-
-Our results from the first draft gives us a reference to preform the second hyperparameter tuning. With the experience for the first time, we could reset the testing parameters into a more reasonable scale. We performed ANOVA to the hyperparameter setting, with the consideration of all 2nd level interactions, to define which hyperparamters have a significant influence on the accuracy rate. with Bonferroni correction,we extracted all terms with $p < 0.05/37$, which are **Filter Numeber 1**, **Filter Numeber 2**, **Learning Rate** and **Batch Size**.
-
-```{r}
-acc = read.csv("res_table.csv")
-acc[,2:9] = apply(acc[,2:9],2,factor)
-fit1 = lm(validation_accuracy~(.-id-train_accuracy)^2,data=acc)
-aov1 = anova(fit1)
-head(aov1)
-rownames(aov1)[aov1$`Pr(>F)` < 0.05/37]
-```
-
-With the results from first attempt, we reset the parameters to new values in the following table. which could be assigned into 384 combinations. We rerun the all the combinations to get the best result...
-
-| Hyperparameter | Annocatation | Value |
-|---|:---:|:---:|
-| Filter Numeber 1 | $N_1$  | [3,4,5,6] |
-| Kernel  Size 1 | $K_1$ | 3 |
-| Filter Numeber 2 | $N_1$ | [8,12,16,20,24,28] |
-| Kernel  Size 2 | $K_2$ | 3 |
-| Hidden Layer 1 | $H_1$ | 120 |
-| Hidden Layer 2 | $H_2$ | 40 |
-| Learning Rate | $R$ | [0.002,0.001,0.0005,0.0001] |
-| Batch Size | $S$ | [64,128,256,512] |
-
-
-```{r, fig.show="hold", out.width="45%", fig.align = "center"}
-res <- fit1$residuals
-qplot(sample=fit1$residuals,data=acc)+labs(title="QQplot of validation accuracy", y="sample",x="theoritical")+
-  geom_qq_line()
-#plot(fit1$fitted.values, rstandard(fit1),ylim=c(-4,4),ylab = "standardized residual",xlab = "predicted accuracy",main = "standardized residual plot")
-```
-We tried to diagnose normal model assumption by a qq plot. Here we would say the normal assumption is plausible, while there seems to be more data located at the extremes of the distribution. 
-
-```{r, echo=TRUE, figures-side1, fig.show="hold", out.width="45%", fig.align = "center"}
-
-library(ggplot2)
-acc = read.table("CNN/all_res.csv",sep=",",header = TRUE)
-#colnames(acc) = c("filter_number_1","filter_number_2","learning_rate","batch_size","train_accuracy","validation_accuracy","time/s")
-options(scipen = 200)
 lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
-lrate = data.frame(learning_rate = names(lrate),
-                   validation_accuracy = lrate,group="")
+lrate = data.frame(learning_rate = factor(names(lrate),levels = c(0.001,0.003,0.01,0.03)),
+                   validation_accuracy = lrate, group="")
 ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
   geom_point(size=4,color=blues9[9]) + 
@@ -225,12 +165,12 @@ ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) +
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$`validation_accuracy`, acc$batch_size ,mean)
-lrate = data.frame(batch_size = as.factor(c(64,128,256,512)),
-                   validation_accuracy = lrate,group=1)
-ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) + 
+batch_size = tapply(acc$`validation_accuracy`, acc$batch_size ,mean)
+batch_size = data.frame(batch_size = factor(names(batch_size),levels = c(32,64,128,256)),
+                   validation_accuracy = batch_size, group="")
+ggplot(batch_size,aes(x=batch_size,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
         theme_minimal() + 
             labs(title="Scatterplot for average accuracy on Batch Size",
            x="Batch Size",
@@ -243,63 +183,85 @@ ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) +
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$validation_accuracy, acc$filter_number_1 ,mean)
-lrate = data.frame(filter_num1 = as.factor(c(3,4,5,6)),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
-        theme_minimal() + 
-            labs(title="Scatterplot for average accuracy on filter number 1",
-           x="filter number 1",
-           y="Average Validation Accuracy") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$validation_accuracy, acc$filter_number_2 ,mean)
-lrate = data.frame(filter_num1 = as.factor(c(8,12,16,20,24,28)),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
-        theme_minimal() + 
-            labs(title="Scatterplot for average accuracy on filter number 1",
-           x="filter number 1",
-           y="Average Validation Accuracy") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
-acc[acc$validation_accuracy==max(acc$validation_accuracy),]
-test<-acc[acc$validation_accuracy>86,-5]
-head(test[order(test$time),])
-acc[acc$filter_number_1==5 & acc$filter_number_2==28 & acc$learning_rate==0.002 & acc$batch_size==64,]
 ```
 
 
-The highest validation accuracy in all 384 models is 86.98%, with time 706.71s. The corresponding hyperparameters combination is filter_num1=6, filter_num2=28, learning_rate=0.001 and batch_size=64, with kernel_size1=3, kernel_size2=3, hidden_layer1=120, hidden_layer2=40. However, if we focus on models with validation accuracy larger than 86 and order them by running time, we could find models with great improvement in running time. So if we'd like to consider trade-off of time, we could choose the model with four hyperparameters combination to be filter_num1=5, filter_num2=24, learning_rate=0.002 and batch_size=128, with validation accuracy to be 86.40% and time to be 510.80s. The reduce in time is about 27.72%, while the accuracy only drops 0.58%. We’ll use these hyperparameters to fit a new model with data in both training and validation sets, and then use the “secret” test dataset to evaluate the perfermance of this model.
+## New Design
 
+Our result from the first draft gave us a reference to preform the second hyperparameter tuning. We adjusted the range of hyperparameters based on the result of our first try:
 
-```{r, echo=TRUE, figures-side2, fig.show="hold", out.width="45%", fig.align = "center"}
-options(scipen = 200)
-lrate = tapply(acc$time, acc$learning_rate,mean)
-lrate = data.frame(learning_rate = names(lrate),
-                   validation_accuracy = lrate,group="")
+| Hyperparameter | Annocatation | Value |
+|---|:---:|:---:|
+| Filter Numeber 1 | $N_1$  | [4,8,12,16] |
+| Kernel  Size 1 | $K_1$ | [3,5] |
+| Filter Numeber 2 | $N_1$ | [32,48,64,80] |
+| Kernel  Size 2 | $K_2$ | [3,5] |
+| Hidden Layer 1 | $H_1$ | [120,160,200] |
+| Hidden Layer 2 | $H_2$ | [20,40,60] |
+| Learning Rate | $R$ | [0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01] |
+| Batch Size | $S$ | [16,32,64,128,256,512] |
+
+This time, we randomly generated 3000 different combinations of hyperparameters. Then, we submitted 3000 parallel jobs on CHTC to fit 3000 CNN models (epoch_num=15) with different combination of hyperparameters. More details can be found in the illustration below:
+
+The whole process took about 8 hours. After all jobs have been completed, we compared their validation accuracy. The highest validation accuracy in all 3000 models is 88.36%, with training time 2996s. The corresponding hyperparameters combination is filter_num1=16, kernel_size1=3, filter_num2=80, kernel_size2=5, hidden_layer1=200, hidden_layer2=40, learning_rate=0.0005 and batch_size=64.
+
+Note that: if we focus on models with validation accuracy larger than 88% and order them by running time, we could find the model with highest training accuracy also took the longest training time among them. Therefore, if we'd like to consider trade-off of time, it's also a good idea to choose another model with validation accuracy 88.00% and training time 1168s. The corresponding hyperparameters combination is filter_num1=12, kernel_size1=3, filter_num2=64, kernel_size2=3, hidden_layer1=120, hidden_layer2=60, learning_rate=0.002 and batch_size=256. In this way, we can save about 2/3 of the training time.
+
+Here we also provide several examples to illustrate how hyperparameters can affect model performance. We only consider data with accuracy greater than 30%. 
+
+```{r, echo=FALSE, fig.show="hold", out.width="42%", fig.align = "center"}
+library(ggplot2)
+
+acc = read.table("CNN/all_res.txt", sep=" ", header = TRUE)
+acc = acc[acc$validation_accuracy>30,]
+
+filter_num1 = tapply(acc$validation_accuracy, acc$filter_num1 ,mean)
+filter_num1 = data.frame(filter_num1 = factor(names(filter_num1),levels = c(4,8,12,16)),
+                   validation_accuracy = filter_num1, group="")
+ggplot(filter_num1,aes(x=filter_num1,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
+        theme_minimal() + 
+            labs(title="Scatterplot for average accuracy on filter number 1",
+           x="filter number 1",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+filter_num2 = tapply(acc$validation_accuracy, acc$filter_num2 ,mean)
+filter_num2 = data.frame(filter_num2 = factor(names(filter_num2),levels = c(32,48,64,80)),
+                   validation_accuracy = filter_num2, group="")
+ggplot(filter_num2,aes(x=filter_num2,y=validation_accuracy)) + 
+  geom_line(aes(group = group),color=blues9[3],size=2) +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
+        theme_minimal() + 
+            labs(title="Scatterplot for average accuracy on filter number 2",
+           x="filter number 2",
+           y="Average Validation Accuracy") +
+      theme(
+            plot.title = element_text(size = 18,hjust = 0.5),
+            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
+            plot.caption = element_text(size = 12, face = "italic"),
+            axis.text = element_text(size=12),
+            axis.title = element_text(size=14),
+            legend.title = element_text(size=14,face="bold"))
+
+lrate = tapply(acc$`validation_accuracy`, acc$learning_rate,mean)
+lrate = data.frame(learning_rate = factor(names(lrate),levels = c(0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01)),
+                   validation_accuracy = lrate, group="")
 ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
   geom_point(size=4,color=blues9[9]) + 
         theme_minimal() + 
-      labs(title="Scatterplot for running time on Learning Rate",
+      labs(title="Scatterplot for average accuracy on Learning Rate",
            x="Learning Rate",
-           y="Average Time") +
+           y="Average Validation Accuracy") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
@@ -308,16 +270,16 @@ ggplot(lrate,aes(x=learning_rate,y=validation_accuracy)) +
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$time, acc$batch_size ,mean)
-lrate = data.frame(batch_size = as.factor(c(64,128,256,512)),
-                   validation_accuracy = lrate,group=1)
-ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) + 
+batch_size = tapply(acc$`validation_accuracy`, acc$batch_size ,mean)
+batch_size = data.frame(batch_size = factor(names(batch_size),levels = c(16,32,64,128,256,512)),
+                   validation_accuracy = batch_size, group="")
+ggplot(batch_size,aes(x=batch_size,y=validation_accuracy)) + 
   geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
+  geom_point(size=4,color=blues9[9]) + ylim(70,90) +
         theme_minimal() + 
-            labs(title="Scatterplot for running time on Batch Size",
+            labs(title="Scatterplot for average accuracy on Batch Size",
            x="Batch Size",
-           y="Average Time") +
+           y="Average Validation Accuracy") +
       theme(
             plot.title = element_text(size = 18,hjust = 0.5),
             plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
@@ -326,51 +288,44 @@ ggplot(lrate,aes(x=batch_size,y=validation_accuracy)) +
             axis.title = element_text(size=14),
             legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$time, acc$filter_number_1 ,mean)
-lrate = data.frame(filter_num1 = as.factor(c(3,4,5,6)),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
-        theme_minimal() + 
-            labs(title="Scatterplot for running time on filter number 1",
-           x="filter number 1",
-           y="Average Time") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
 
-lrate = tapply(acc$time, acc$filter_number_2 ,mean)
-lrate = data.frame(filter_num1 = as.factor(c(8,12,16,20,24,28)),
-                   validation_accuracy = lrate,group="")
-ggplot(lrate,aes(x=filter_num1,y=validation_accuracy)) + 
-  geom_line(aes(group = group),color=blues9[3],size=2) +
-  geom_point(size=4,color=blues9[9])  +
-        theme_minimal() + 
-            labs(title="Scatterplot for running time on filter number 2",
-           x="filter number 2",
-           y="Average Time") +
-      theme(
-            plot.title = element_text(size = 18,hjust = 0.5),
-            plot.subtitle = element_text(size = 12, face = "bold", hjust = 0.8),
-            plot.caption = element_text(size = 12, face = "italic"),
-            axis.text = element_text(size=12),
-            axis.title = element_text(size=14),
-            legend.title = element_text(size=14,face="bold"))
-acc[acc$validation_accuracy==max(acc$validation_accuracy),]
-test<-acc[acc$validation_accuracy>86,-5]
-head(test[order(test$time),])
-acc[acc$filter_number_1==3 & acc$filter_number_2==8 & acc$learning_rate==0.001 & acc$batch_size==256,]
-acc[acc$time==min(acc$time),]
 ```
 
-Based on these plots, we could always find the best hyperparameters for validation accuracy and running time. Filter number 1=5, filter number 2=28, learning rate=0.002 and batch size=64 give the highest average validation accuracy separately; Filter number 1=3, filter number 2=8, learning rate=0.001 and batch size=256 give the lowest average running time separately. However, compared with our final models, the combination of best hyperparameters not always gives the best results. Also, if we choose combination of best hyperparameters for validation accuracy: filter number 1=5, filter number 2=28, learning rate=0.002 and batch size=64, the accuracy is 86.02%. Therefore, the relationship among hyperparameters and validation accuracy/time is not convex.
+Based on these plots, we can find 8 hyperparameters with highest average validation accuracy. However, compared with our final models, the combination of these hyperparameters leads to a lower validation accuracy 87.51%. Therefore, the relationship among hyperparameters and validation accuracy is very complex. This confirms the necessity of random search in hyperparameter tuning.
 
 
+## Final Model
+
+By using CHTC, we figured out the best combination of hyperparameters among 3000 candidates efficiently. Then, We fitted a final model with data in both training and validation sets based on these hyperparameters, and use the **"secret"** test dataset to evaluate the perfermance of this model.
+
+```{r, echo=FALSE, out.width = '55%', fig.align = "center"}
+acc1<-c(75.439, 83.471, 86.905, 88.762, 90.438, 92.298, 91.954, 94.331, 94.941, 95.667, 97.057, 97.166, 97.012, 98.062, 98.607)/100
+acc2<-c(75.238, 82.378, 84.707, 85.749, 85.933, 86.853, 86.424, 86.577, 87.251, 87.680, 87.741, 87.128, 87.128, 87.803, 88.140)/100
+plot(1:15, acc1, type="l", col="blue", ylim=c(0.7, 1), cex.lab=1.2, cex.main=1.2, lty=2, 
+     main="Accuracy in each Epoch",
+     xlab="Epoch", ylab="Accuracy", lwd=2)
+abline(h=0.88140, col="gray", lty=3, lwd=1.5)
+lines(1:15, acc2, type="l", col="red", lwd=2, lty=1)
+legend("bottomright", legend=c("Training accuracy", "Test accuracy"),
+       col=c("blue", "red"), lty=c(2, 1), cex=1.2)
+```
 
 
+The accuracy plot showed that: As the number of epoch increasing, the training accuracy kept increasing and was approaching to 100%, while the test accuracy also kept increasing at first but stabilized at about 88%. It proved that our final model has a good performance on product images classification.
+
+# Conclusion
+
+In this project, we build a classifier based on CNN, which can predict the category of a product by using its image. By using CHTC, we boost up our pipeline at 2 steps: 1. data preprocessing for more than 40 thousand images. 2. hyperparameter tuning among 3 thousand combinations. The tasks in each step are independent and time-consuming, so there is no doubt that parallel computing is a great method to save our time. The accuracy of our final model is about 
+
+Since we are not very proficient in CNN, there might be some details in model design that can be improved. However, we still think this is a wonderful practice for us to get familiar with CHTC and parallel computing.
+
+\newpage
+
+# Reference
+
+1. Hutter F, Hoos H, Leyton-Brown K. An efficient approach for assessing hyperparameter importance[C]//International conference on machine learning. PMLR, 2014: 754-762.
+
+2. Aszemi N M, Dominic P D D. Hyperparameter Optimization in Convolutional Neural Network using Genetic Algorithms[J].
+
+3. CHTC Official Website: Running Python Jobs on CHTC: https://chtc.cs.wisc.edu/python-jobs.shtml
 

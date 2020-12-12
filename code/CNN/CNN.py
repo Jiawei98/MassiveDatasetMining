@@ -22,6 +22,8 @@ if torch.cuda.is_available():
 hyper_parameters = pd.read_csv("randomSearchCNN.csv").iloc[int(sys.argv[1])].values.tolist()
 lrate = hyper_parameters[6]
 hyper_parameters = [int(i) for i in hyper_parameters]
+hyper_parameters[6] = lrate
+
 ## Model Settings
 RANDOM_SEED = 1
 LEARNING_RATE = lrate
@@ -157,9 +159,9 @@ print('Total Training Time: %.2f min' % ((time.time() - start_time)/60))
 
 print('Test accuracy: %.2f%%' % (compute_accuracy(model, test_loader, device=DEVICE)))
 
-all_acc = [train_acc[len(train_acc)-1],test_acc[len(test_acc)-1]]
+all_acc = [train_acc[len(train_acc)-1],test_acc[len(test_acc)-1],(time.time() - start_time)]
 res = hyper_parameters + all_acc
 
 with open("res_"+sys.argv[1]+".txt", 'w') as f:
     for item in res:
-        f.write("%s\t" % item)
+        f.write("%s " % item)
