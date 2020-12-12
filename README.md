@@ -10,12 +10,12 @@ In general, we first preprocessed the image on CHTC to get dimensional reduced, 
 
 # Files
 
-- `code\CNN\` contains the code for CNN model on CHTC.
-- `code\build_by_packages\` contains the code to build R and Python environment, and essential packages.
-- `code\convertImages\` contains the code for image preprocessing.
-- `drafts\` contains the proposal, first and second version of reports.
-- `figures\` contains the figures rendered in our project.
-- `final_draft\` is our final report.
+- `\code\CNN` contains the code for CNN model on CHTC.
+- `\code\build_by_packages` contains the code to build R and Python environment, and essential packages.
+- `\code\convertImages\` contains the code for image preprocessing.
+- `\drafts` contains the proposal, first and second version of reports.
+- `\figures` contains the figures rendered in our project.
+- `\final_draft` is our final report.
 
 ## Group members
 
