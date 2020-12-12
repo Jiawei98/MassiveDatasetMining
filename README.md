@@ -16,7 +16,7 @@ In general, we first preprocessed the image on CHTC to get dimensional reduced, 
 - `\code\convertImages` contains the code for image preprocessing on CHTC.
 - `\drafts` contains the proposal, first and second version of reports.
 - `\figures` contains the figures rendered in our project.
-- `\final_draft` is our final report.
+- `\final_draft.pdf` and `\project.pdf` are the same final report.
 
 ## Group members
 
